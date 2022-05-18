@@ -34,19 +34,20 @@ func main() {
 	flag.Parse()
 
 	if len(*fileName) == 0 {
-		log.Fatal("file with quotes should be defined")
+		log.Fatal("File with quotes should be defined")
 	}
 	if *complexity == 0 {
-		log.Fatal("complexity should not be zero")
+		log.Fatal("Complexity should not be zero")
 	}
 
 	logLevel, err := log.ParseLevel(*level)
 	if err != nil {
-		log.Fatalf("incorrect log level %s", *level)
+		log.Fatalf("Incorrect log level %s", *level)
 	}
 	log.SetLevel(logLevel)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	logger := log.WithContext(ctx)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -57,7 +58,7 @@ func main() {
 
 	storage := file.NewStorage(*fileName)
 	if err := storage.Start(); err != nil {
-		log.Fatal("failed to start storage", err)
+		logger.Fatal("Failed to start storage", err)
 	}
 
 	fullAddress := address + ":" + strconv.Itoa(int(*port))
@@ -65,7 +66,7 @@ func main() {
 	s := service.NewService(storage, uint8(*complexity))
 	server := tcp.NewServer(fullAddress, s)
 	if err := server.Start(ctx); err != nil {
-		log.Fatal("error executing server", err)
+		logger.Fatal("Error executing server", err)
 	}
-	log.Info("Server stopped")
+	logger.Info("Server stopped")
 }
