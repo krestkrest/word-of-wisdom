@@ -30,7 +30,10 @@ func (s *Storage) Start() error {
 	}
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		s.quotes = append(s.quotes, strings.TrimSpace(scanner.Text()))
+		quote := strings.TrimSpace(scanner.Text())
+		if len(quote) != 0 {
+			s.quotes = append(s.quotes, quote)
+		}
 	}
 	if err = scanner.Err(); err != nil {
 		return errors.Wrap(err, "failed to scan file with quotes")
@@ -42,6 +45,9 @@ func (s *Storage) Start() error {
 }
 
 func (s *Storage) GetQuote() string {
-	index := rand.Int() % len(s.quotes)
-	return s.quotes[index]
+	return s.GetQuoteByIndex(rand.Int())
+}
+
+func (s *Storage) GetQuoteByIndex(index int) string {
+	return s.quotes[index%len(s.quotes)]
 }
