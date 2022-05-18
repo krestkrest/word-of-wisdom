@@ -20,6 +20,8 @@ type Server struct {
 	handler network.StreamHandler
 }
 
+var _ network.Server = (*Server)(nil)
+
 func NewServer(address string, handler network.StreamHandler) *Server {
 	return &Server{
 		address: address,
